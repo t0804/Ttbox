@@ -1,0 +1,24 @@
+/* 主窗口背景 */
+QMainWindow {
+    background: #f0f2f5;
+}
+
+/* 功能按钮 */
+QPushButton {
+    background: #ffffff;
+    border: 1px solid #dddfe2;
+    border-radius: 5px;
+    margin: 5px;
+}
+
+QPushButton:hover {
+    background: #e9ebee;
+}
+
+/* 计算器显示屏 */
+QLineEdit {
+    font-size: 24px;
+    padding: 10px;
+    border: 2px solid #dddfe2;
+    border-radius: 5px;
+}
