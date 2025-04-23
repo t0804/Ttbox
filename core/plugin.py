@@ -12,7 +12,7 @@ class BasePlugin(ABC):
     @abstractmethod
     def icon(self):
         """插件图标"""
-        return QIcon("./plugin_default_icon.svg")
+        return QIcon("../icons/plugin_default_icon.svg")
 
     @property
     @abstractmethod
