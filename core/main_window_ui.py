@@ -1,7 +1,7 @@
 import datetime
 
 from PyQt6.QtCore import Qt, QSize, QTimer, QDateTime
-from PyQt6.QtGui import QIcon, QAction
+from PyQt6.QtGui import QIcon, QAction, QPixmap
 
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget,
@@ -10,12 +10,16 @@ from PyQt6.QtWidgets import (
     QFrame, QStatusBar, QStackedWidget
 )
 
+from pagination_controls import create_pagination_controls
+from main_window_logic import MainWindowLogic
+
 
 class MainWindowUI(QMainWindow):
     """仅负责主窗口界面布局，不包含业务逻辑"""
 
     def __init__(self):
         super().__init__()
+        self._logic = MainWindowLogic()
         self.setWindowTitle("Ttbox")
         self.resize(1000, 700)
 
@@ -26,7 +30,6 @@ class MainWindowUI(QMainWindow):
         self.setCentralWidget(central_widget)
         # 初始化状态栏和时间显示
         self.setup_statusbar()
-
 
         # 主布局（水平分割：左侧导航 + 右侧内容）
         self.main_layout = QHBoxLayout(central_widget)
@@ -41,7 +44,6 @@ class MainWindowUI(QMainWindow):
         self.stacked_widget = QStackedWidget()
         self.main_layout.addWidget(self.stacked_widget, stretch=1)
         self.init_pages()
-
 
     def init_pages(self):
         self.stacked_widget.addWidget(self.create_home_page())  # 首页
@@ -71,18 +73,9 @@ class MainWindowUI(QMainWindow):
         title_bar.addWidget(search_box)
 
         content_layout.addWidget(r_top)
-        # content_layout.addLayout(title_bar)
 
-        # 功能卡片网格
-        self.card_grid = QGridLayout()
-        self.card_grid.setSpacing(15)
-        content_layout.addLayout(self.card_grid)
-        content_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        # 生成示例卡片
-        self.add_card("计算器", "icons/calc.svg", 0, 0)
-        self.add_card("剪贴板", "icons/clipboard.svg", 0, 1)
-        self.add_card("截图", "icons/camera.svg", 0, 2)
-        # 更多卡片...
+        # 增加插件工具
+        content_layout.addWidget(self.plugins_widget())
 
         return page
 
@@ -97,72 +90,40 @@ class MainWindowUI(QMainWindow):
         btn1 = QPushButton(QIcon("icons/folder.svg"), '全部工具')
         btn1.setFixedHeight(80)
 
-
         # 单击按钮后执行的函数，逻辑较简单没有必要放到logic类
         def btn1_click():
             print('点击了按钮btn1')
             self.stacked_widget.setCurrentIndex(0)
-        btn1.clicked.connect(btn1_click)
 
+        btn1.clicked.connect(btn1_click)
 
         btn2 = QPushButton(QIcon("icons/folder.svg"), '其他')
         btn2.setFixedHeight(80)
 
-
         # 单击按钮后执行的函数
-
 
         def btn2_click():
             print('点击了按钮btn2')
             self.stacked_widget.setCurrentIndex(1)
-        btn2.clicked.connect(btn2_click)
 
+        btn2.clicked.connect(btn2_click)
 
         btn3 = QPushButton(QIcon("icons/folder.svg"), '设置')
         btn3.setFixedHeight(80)
-           # 第一个按钮
+
+        # 第一个按钮
 
         # 单击按钮后执行的函数
         def btn3_click():
             print('点击了按钮btn3')
             self.stacked_widget.setCurrentIndex(2)
+
         btn3.clicked.connect(btn3_click)
 
         nav_layout.addWidget(btn1)
         nav_layout.addWidget(btn2)
         nav_layout.addWidget(btn3)
         self.main_layout.addWidget(nav_frame)
-
-
-
-    def add_card(self, title: str, icon_path: str, row: int, col: int):
-        """添加功能卡片到网格"""
-        card = QFrame()
-        card.setFixedSize(180, 120)
-
-        layout = QVBoxLayout(card)
-        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        icon = QLabel()
-        icon.setPixmap(QIcon(icon_path).pixmap(QSize(48, 48)))
-        layout.addWidget(icon, alignment=Qt.AlignmentFlag.AlignCenter)
-
-        title_label = QLabel(title)
-        title_label.setStyleSheet("font-weight: bold;")
-        layout.addWidget(title_label, alignment=Qt.AlignmentFlag.AlignCenter)
-
-        self.card_grid.addWidget(card, row, col)
-        # # 中央滚动区域
-        # self.scroll = QScrollArea()
-        # self.scroll.setWidgetResizable(True)
-        # self.setCentralWidget(self.scroll)
-        #
-        # # 功能块容器
-        # self.container = QWidget()
-        # self.scroll.setWidget(self.container)
-        # self.layout = QVBoxLayout(self.container)
-        # self.layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-
 
     def setup_menubar(self):
         """设置菜单栏"""
@@ -215,7 +176,6 @@ class MainWindowUI(QMainWindow):
         current_time = QDateTime.currentDateTime().toString("yyyy-MM-dd hh:mm:ss")
         self.time_label.setText(f"🕒 {current_time}")
 
-
     def create_other_page(self):
         # 其他页
         page = QWidget()
@@ -226,7 +186,6 @@ class MainWindowUI(QMainWindow):
         return page
 
     def create_settings_page(self):
-
         # 设置页
         page = QWidget()
         content_layout = QVBoxLayout(page)
@@ -235,6 +194,39 @@ class MainWindowUI(QMainWindow):
 
         return page
 
+    def plugins_widget(self):
+        top_frame = QFrame()
+        top_layout = QVBoxLayout(top_frame)
+        # 添加插件部分
+        # 插件展示区（使用QStackedWidget实现分页）
+        plugin_stack = QStackedWidget()
+        top_layout.addWidget(plugin_stack)
+        # print(self._logic.plugins)
+        # 在容器中添加卡片页
+        if len(self._logic.plugins) % 9 == 0:
+            max_page = len(self._logic.plugins) // 9
+        else:
+            max_page = len(self._logic.plugins) // 9 + 1
+        for i in range(max_page):
+            plugin_stack.addWidget(self.create_plugins_page(i + 1))
+        # 默认第一页
+        plugin_stack.setCurrentIndex(0)
 
+        # 添加翻页控制
+        top_layout.addLayout(create_pagination_controls(plugin_stack, self._logic.plugins))
 
+        return top_frame
 
+    # 生成当页的插件内容，3x3的网格布局
+    def create_plugins_page(self, page_num=1):
+        # 功能卡片网格
+        page = QWidget()
+        card_grid = QGridLayout(page)
+        card_grid.setSpacing(15)
+        # 根据页数获取卡片对象列表
+        cards = self._logic.get_page_card(page_num)
+        # cards = []
+        # 添加卡片
+        for i in cards:
+            card_grid.addWidget(i[0], i[1], i[2])
+        return page
