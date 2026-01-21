@@ -16,6 +16,6 @@ class TestPlugin(BasePlugin):
         return '1.0.0'
 
     def create_window(self):
-
+        print('创建一个新窗口')
         return Main_window()
 

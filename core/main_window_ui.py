@@ -1,4 +1,4 @@
-import datetime
+
 
 from PyQt6.QtCore import Qt, QSize, QTimer, QDateTime
 from PyQt6.QtGui import QIcon, QAction, QPixmap
@@ -10,9 +10,11 @@ from PyQt6.QtWidgets import (
     QFrame, QStatusBar, QStackedWidget
 )
 
-from pagination_controls import create_pagination_controls
-from main_window_logic import MainWindowLogic
-
+from core.pagination_controls import create_pagination_controls
+from core.main_window_logic import MainWindowLogic
+from core import logger
+logger = logger.get_logger(__name__)
+logger.debug('MainWindowUI init')
 
 class MainWindowUI(QMainWindow):
     """仅负责主窗口界面布局，不包含业务逻辑"""
@@ -201,6 +203,7 @@ class MainWindowUI(QMainWindow):
         # 插件展示区（使用QStackedWidget实现分页）
         plugin_stack = QStackedWidget()
         top_layout.addWidget(plugin_stack)
+        logger.debug(self._logic.plugins)
         # print(self._logic.plugins)
         # 在容器中添加卡片页
         if len(self._logic.plugins) % 9 == 0:
@@ -225,6 +228,8 @@ class MainWindowUI(QMainWindow):
         card_grid.setSpacing(15)
         # 根据页数获取卡片对象列表
         cards = self._logic.get_page_card(page_num)
+        logger.debug('cards')
+        logger.debug(cards)
         # cards = []
         # 添加卡片
         for i in cards:
