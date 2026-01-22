@@ -5,6 +5,7 @@ from .ui import Main_window
 import os
 
 class TestPlugin(BasePlugin):
+    @property
     def name(self):
         return 'test_plugin'
 
@@ -12,10 +13,13 @@ class TestPlugin(BasePlugin):
         icon_path = os.path.join(config.ICONS_DIR, 'test_plugin_icon.svg')
         return QIcon(str(icon_path))
 
+    @property
     def version(self) -> str:
         return '1.0.0'
 
     def create_window(self):
         print('创建一个新窗口')
-        return Main_window()
+        self.window = Main_window()
+        self.window.show()
+        return self.window
 

@@ -203,7 +203,7 @@ class MainWindowUI(QMainWindow):
         # 插件展示区（使用QStackedWidget实现分页）
         plugin_stack = QStackedWidget()
         top_layout.addWidget(plugin_stack)
-        logger.debug(self._logic.plugins)
+        # logger.debug(self._logic.plugins)
         # print(self._logic.plugins)
         # 在容器中添加卡片页
         if len(self._logic.plugins) % 9 == 0:
@@ -228,10 +228,17 @@ class MainWindowUI(QMainWindow):
         card_grid.setSpacing(15)
         # 根据页数获取卡片对象列表
         cards = self._logic.get_page_card(page_num)
-        logger.debug('cards')
-        logger.debug(cards)
+        # logger.debug('cards')
+        # logger.debug(cards)
         # cards = []
         # 添加卡片
-        for i in cards:
-            card_grid.addWidget(i[0], i[1], i[2])
+        for card in cards:
+            # 连接点击信号
+            card[0].card_clicked.connect(self.plugin_card_click)
+            card_grid.addWidget(card[0], card[1], card[2])
         return page
+
+    def plugin_card_click(self, plugin):
+        logger.debug(f'点击了插件卡片: {plugin.name}')
+        self._logic.open_plugin_window(plugin)
+

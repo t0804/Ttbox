@@ -3,6 +3,8 @@ import importlib
 from typing import Callable
 # from main_window_ui import MainWindowUI
 from core.plugin_card import PluginCard
+from core import logger
+logger = logger.get_logger(__name__)
 
 
 class MainWindowLogic:
@@ -20,8 +22,6 @@ class MainWindowLogic:
         # 模拟加载23个插件实例
         self.plugins = [TestPlugin() for i in range(23)]
 
-    def test(self):
-        print('test_method')
 
     def get_page_card(self, page_num=1):
         """
@@ -45,9 +45,9 @@ class MainWindowLogic:
             row = idx // 3  # 行索引 (0-2)
             col = idx % 3  # 列索引 (0-2)
 
-            # 创建卡片对象 (根据实际需求调整Card初始化)
+            # 创建卡片对象
+            # TODO:不应直接实例化插件，要先检查插件是否合法，是否继承自BasePlugin
             card = PluginCard(plugin)
-            card.create_card()
             # TODO: 如果不足9个则行列位置不对，需要调整
             cards_with_pos.append((card, row, col))
         # print(cards_with_pos)
@@ -68,11 +68,9 @@ class MainWindowLogic:
     #         except ImportError as e:
     #             print(f"加载插件失败: {plugin_name}\nError: {e}")
     #
-    # def make_plugin_opener(self, module) -> Callable:
-    #     """生成插件打开函数的闭包"""
-    #
-    #     def open_plugin():
-    #         plugin_window = module.PluginWindow()
-    #         plugin_window.exec()
-    #
-    #     return open_plugin
+    def open_plugin_window(self, plugin):
+        """创建插件窗口"""
+        logger.debug(f'打开插件窗口: {plugin.name}')
+        plugin.create_window()
+
+
