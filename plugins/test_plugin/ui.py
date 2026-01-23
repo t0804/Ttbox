@@ -8,5 +8,6 @@ class Main_window(QWidget):
         label1 = QLabel('Test')
         btn1 = QPushButton('Test')
         layout = QVBoxLayout()
-        layout.addWidget(label1, btn1)
+        layout.addWidget(label1)
+        layout.addWidget(btn1)
         self.setLayout(layout)
