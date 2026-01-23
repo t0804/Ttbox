@@ -4,6 +4,8 @@ from typing import Callable
 # from main_window_ui import MainWindowUI
 from core.plugin_card import PluginCard
 from core import logger
+from core.config import PLUGINS_DIR
+from core.plugin import BasePlugin
 logger = logger.get_logger(__name__)
 
 
@@ -13,15 +15,44 @@ class MainWindowLogic:
     def __init__(self):
         # self.ui = ui
         self.plugins = []
-        self.load_test_plugins()
+        self.load_plugins()
+        # self.load_test_plugins()
 
     def load_test_plugins(self):
         """测试插件，实际上应该是动态加载所有插件"""
-        from plugins.test_plugin.index import TestPlugin
+        from plugins.test_plugin import TestPlugin
 
         # 模拟加载23个插件实例
         self.plugins = [TestPlugin() for i in range(23)]
 
+    def load_plugins(self):
+        """加载所有plugins中的合法插件"""
+        for plugin_name in os.listdir(PLUGINS_DIR):
+            if not os.path.isdir(os.path.join(PLUGINS_DIR, plugin_name)):
+                # 不是文件夹
+                continue
+            init_file = os.path.join(PLUGINS_DIR, plugin_name, '__init__.py')
+            if not os.path.exists(init_file):
+                # 没有__init__.py文件
+                continue
+            module_name = f"plugins.{plugin_name}"
+            try:
+                module = importlib.import_module(module_name)
+                # 检查是否有__plugin_class__属性
+                if not hasattr(module, '__plugin_class__'):
+                    logger.error(f'模块 {module_name} 没有 __plugin_class__ 属性')
+                    continue
+                # 检测是否是BasePlugin的子类
+                if not issubclass(getattr(module, '__plugin_class__'), BasePlugin):
+                    logger.error(f'模块 {module_name} 的 __plugin_class__ 属性不是 BasePlugin 的子类')
+                    continue
+                # 实例化插件类
+                plugin_class = getattr(module, '__plugin_class__')
+                self.plugins.append(plugin_class())
+                logger.debug(f'导入模块 {module_name} 成功')
+
+            except ImportError as e:
+                logger.error(f'导入模块 {module_name} 失败: {e}')
 
     def get_page_card(self, page_num=1):
         """
@@ -46,7 +77,6 @@ class MainWindowLogic:
             col = idx % 3  # 列索引 (0-2)
 
             # 创建卡片对象
-            # TODO:不应直接实例化插件，要先检查插件是否合法，是否继承自BasePlugin
             card = PluginCard(plugin)
             # TODO: 如果不足9个则行列位置不对，需要调整
             cards_with_pos.append((card, row, col))

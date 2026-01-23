@@ -1,5 +1,8 @@
+import os
 from abc import ABCMeta, ABC, abstractmethod
 from PyQt6.QtGui import QIcon
+from core.config import ICONS_DIR
+
 
 class PluginMeta(ABCMeta):
     def __new__(mcls, name, bases, namespace, **kwargs):
@@ -26,7 +29,7 @@ class BasePlugin(ABC, metaclass=PluginMeta):
     @abstractmethod
     def icon(self):
         """插件图标"""
-        return QIcon("../icons/plugin_default_icon.svg")
+        return QIcon(os.path.join(ICONS_DIR, "plugin_default_icon.svg"))
 
     @property
     @abstractmethod
