@@ -1,6 +1,6 @@
 import sys
 
-from PyQt6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication
 from core.main_window_ui import MainWindowUI
 # from main_window_logic import MainWindowLogic
 from core import logger

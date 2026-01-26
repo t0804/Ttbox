@@ -1,6 +1,6 @@
 from core.plugin import BasePlugin
 from core import config
-from PyQt6.QtGui import QIcon
+from PySide6.QtGui import QIcon
 from .ui import Main_window
 import os
 

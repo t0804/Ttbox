@@ -78,26 +78,10 @@ class MainWindowLogic:
 
             # 创建卡片对象
             card = PluginCard(plugin)
-            # TODO: 如果不足9个则行列位置不对，需要调整
             cards_with_pos.append((card, row, col))
         # print(cards_with_pos)
         return cards_with_pos
 
-    # def load_plugins(self):
-    #     """动态加载所有插件，其实就是把所有的插件实例化，并添加到self.plugins"""
-    #     plugin_dir = "../plugins"
-    #     for plugin_name in os.listdir(plugin_dir):
-    #         if not os.path.isdir(os.path.join(plugin_dir, plugin_name)):
-    #             continue
-    #
-    #         try:
-    #             module = importlib.import_module(f"plugins.{plugin_name}.ui")
-    #             btn = self.ui.add_plugin_button(module.PLUGIN_NAME)
-    #             btn.clicked.connect(self.make_plugin_opener(module))
-    #             self.plugins[plugin_name] = module
-    #         except ImportError as e:
-    #             print(f"加载插件失败: {plugin_name}\nError: {e}")
-    #
     def open_plugin_window(self, plugin):
         """创建插件窗口"""
         logger.debug(f'打开插件窗口: {plugin.name}')

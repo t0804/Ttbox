@@ -1,9 +1,9 @@
 
 
-from PyQt6.QtCore import Qt, QSize, QTimer, QDateTime
-from PyQt6.QtGui import QIcon, QAction, QPixmap
+from PySide6.QtCore import Qt, QSize, QTimer, QDateTime
+from PySide6.QtGui import QIcon, QAction, QPixmap
 
-from PyQt6.QtWidgets import (
+from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget,
     QGridLayout, QVBoxLayout, QHBoxLayout,
     QLabel, QLineEdit, QPushButton,
