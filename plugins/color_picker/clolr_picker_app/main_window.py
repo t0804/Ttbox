@@ -1,9 +1,12 @@
+import time
+
 from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QFrame,
                                QPushButton, QLabel, QSlider, QLineEdit, QColorDialog, QColormap)
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor
 from core.logger import get_logger
 from uitls import qt_hsl_to_common, common_hsl_to_qt
+from screen_color_picker import start_screen_color_pick
 logger = get_logger(__name__)
 
 
@@ -16,7 +19,7 @@ class ColorPickerMainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("颜色选择器")
         self.setGeometry(100, 100, 300, 200)
-        self._current_color = QColor("#FF0000")
+        self._current_color = QColor("#000000")
         self.color_label_border_style = "border: 2px solid black;"
         self.updating = False
         self.setup_ui()
@@ -47,6 +50,7 @@ class ColorPickerMainWindow(QMainWindow):
         self.updating = True
 
         try:
+            self._current_color = color
             self.hex_input.setText(color.name())
             self.rgb_input.setText(f"{color.red()},{color.green()},{color.blue()}")
             h_qt = color.hue()
@@ -113,7 +117,9 @@ class ColorPickerMainWindow(QMainWindow):
         self.hex_input.setFixedWidth(120)
         self.hex_input.editingFinished.connect(self.on_hex_input_changed)
         hex_layout.addWidget(self.hex_input)
-        hex_layout.addWidget(QPushButton("复制"))
+        hex_copy_button = QPushButton("复制")
+        hex_copy_button.clicked.connect(self.on_hex_copy_click)
+        hex_layout.addWidget(hex_copy_button)
         color_value_layout.addLayout(hex_layout)
         # RGB
         rgb_layout = QHBoxLayout()
@@ -122,7 +128,9 @@ class ColorPickerMainWindow(QMainWindow):
         self.rgb_input.setFixedWidth(120)
         self.rgb_input.editingFinished.connect(self.on_rgb_input_changed)
         rgb_layout.addWidget(self.rgb_input)
-        rgb_layout.addWidget(QPushButton("复制"))
+        rbg_copy_button = QPushButton("复制")
+        rbg_copy_button.clicked.connect(self.on_rgb_copy_click)
+        rgb_layout.addWidget(rbg_copy_button)
         color_value_layout.addLayout(rgb_layout)
         # HSL
         hsl_layout = QHBoxLayout()
@@ -131,13 +139,17 @@ class ColorPickerMainWindow(QMainWindow):
         self.hsl_input.setFixedWidth(120)
         self.hsl_input.editingFinished.connect(self.on_hsl_input_changed)
         hsl_layout.addWidget(self.hsl_input)
-        hsl_layout.addWidget(QPushButton("复制"))
+        hsl_copy_button = QPushButton("复制")
+        hsl_copy_button.clicked.connect(self.on_hsl_copy_click)
+        hsl_layout.addWidget(hsl_copy_button)
         color_value_layout.addLayout(hsl_layout)
         right_layout.addLayout(color_value_layout)
 
         slider_frame = self.create_sliders()
         right_layout.addWidget(slider_frame)
         # 创建组件后先更新一次颜色显示
+        # 因为连接信号在setup_ui最后 现在还没连接无法使用发信号方式初始化，可以放到__init__中setup_ui()前实现
+        # self.color_changed.emit(self._current_color)
         self.on_color_label_changed(self._current_color)
         return right_layout
 
@@ -229,6 +241,14 @@ class ColorPickerMainWindow(QMainWindow):
             self.color_changed.emit(self._current_color)
         self.updating = False
 
+    def on_hex_copy_click(self):
+        QApplication.clipboard().setText(self.hex_input.text())
+
+    def on_rgb_copy_click(self):
+        QApplication.clipboard().setText(self.rgb_input.text())
+
+    def on_hsl_copy_click(self):
+        QApplication.clipboard().setText(self.hsl_input.text())
 
     def create_sliders(self):
         slider_frame = QFrame()
@@ -357,19 +377,40 @@ class ColorPickerMainWindow(QMainWindow):
         widget = QWidget()
         layout = QVBoxLayout(widget)
 
-        self.get_color_button = QPushButton("取色")
-        self.reset_button = QPushButton("重置")
-
-        layout.addWidget(self.get_color_button)
-        layout.addWidget(self.reset_button)
+        get_color_button = QPushButton("取色")
+        get_color_button.clicked.connect(self.get_color)
+        reset_button = QPushButton("重置")
+        reset_button.clicked.connect(self.reset_color)
+        layout.addWidget(get_color_button)
+        layout.addWidget(reset_button)
 
         return widget
-    # def resizeEvent(self, event):
-    #     """窗口大小变化时触发"""
-    #     print(f"窗口大小: {self.width()} x {self.height()}")
-    #     if hasattr(self, 'color_display'):
-    #         print(f"颜色显示区: {self.color_display.size()}")
-    #     super().resizeEvent(event)
+
+    def reset_color(self):
+        self.color_changed.emit(QColor("#000000"))
+
+    def get_color(self):
+
+        self.hide()
+        try:
+            # 拾取颜色
+            color = start_screen_color_pick()
+
+            if color.isValid():  # 用户点击了OK
+                self._current_color = color
+                # 直接发射信号，让统一机制处理更新
+                self.color_changed.emit(color)
+
+        except Exception as e:
+            logger.error(f"取色过程中发生错误: {e}")
+
+        finally:
+            # 无论成功失败，都必须恢复窗口
+            self.show()
+            self.raise_()
+            self.activateWindow()
+
+
 import sys
 from PySide6.QtWidgets import QApplication
 
