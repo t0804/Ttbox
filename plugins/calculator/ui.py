@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QDialog
+from PySide6.QtWidgets import QDialog
 
 PLUGIN_NAME = "计算器"  # 必须定义插件名称
 

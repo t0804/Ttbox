@@ -1,5 +1,10 @@
+import os
 from abc import ABCMeta, ABC, abstractmethod
-from PyQt6.QtGui import QIcon
+from PySide6.QtGui import QIcon
+from core.config import ICONS_DIR
+from core.logger import get_logger
+logger = get_logger(__name__)
+
 
 class PluginMeta(ABCMeta):
     def __new__(mcls, name, bases, namespace, **kwargs):
@@ -23,10 +28,10 @@ class BasePlugin(ABC, metaclass=PluginMeta):
     def name(self):
         """插件名称"""
         pass
-    @abstractmethod
+
     def icon(self):
         """插件图标"""
-        return QIcon("../icons/plugin_default_icon.svg")
+        return QIcon(os.path.join(ICONS_DIR, "plugin_default_icon.svg"))
 
     @property
     @abstractmethod
@@ -34,7 +39,7 @@ class BasePlugin(ABC, metaclass=PluginMeta):
         """插件版本号"""
         pass
 
-    @abstractmethod
     def create_window(self):
         """创建窗口"""
+        logger.debug(f'插件无窗口')
         pass

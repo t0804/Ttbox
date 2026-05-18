@@ -1,4 +1,6 @@
 import pathlib
-ROOT_DIR = pathlib.Path(__file__).parent.parent.absolute()
-print(ROOT_DIR)
-ICONS_DIR = ROOT_DIR / 'icons'
+BASE_DIR = pathlib.Path(__file__).parent.parent.absolute()
+ICONS_DIR = BASE_DIR / 'icons'
+PLUGINS_DIR = BASE_DIR / 'plugins'
+
+

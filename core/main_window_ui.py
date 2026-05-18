@@ -1,9 +1,9 @@
 
 
-from PyQt6.QtCore import Qt, QSize, QTimer, QDateTime
-from PyQt6.QtGui import QIcon, QAction, QPixmap
+from PySide6.QtCore import Qt, QSize, QTimer, QDateTime
+from PySide6.QtGui import QIcon, QAction, QPixmap
 
-from PyQt6.QtWidgets import (
+from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget,
     QGridLayout, QVBoxLayout, QHBoxLayout,
     QLabel, QLineEdit, QPushButton,
@@ -225,6 +225,8 @@ class MainWindowUI(QMainWindow):
         # 功能卡片网格
         page = QWidget()
         card_grid = QGridLayout(page)
+        # 卡片网格使用左上角对齐
+        card_grid.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         card_grid.setSpacing(15)
         # 根据页数获取卡片对象列表
         cards = self._logic.get_page_card(page_num)

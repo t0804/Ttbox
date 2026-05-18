@@ -1,5 +1,5 @@
 # 翻页控制器
-from PyQt6.QtWidgets import QHBoxLayout, QLabel, QPushButton
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton
 
 
 def create_pagination_controls(plugin_stack, plugins):

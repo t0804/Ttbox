@@ -1,14 +1,14 @@
 # 插件卡片
-from PyQt6.QtWidgets import QWidget, QFrame, QVBoxLayout, QLabel
-from PyQt6.QtGui import QIcon, QPixmap
-from PyQt6.QtCore import Qt, QSize, pyqtSignal
+from PySide6.QtWidgets import QWidget, QFrame, QVBoxLayout, QLabel
+from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtCore import Qt, QSize, Signal
 from core import logger
 logger = logger.get_logger(__name__)
 
 # 每个卡片应该是一个对象
 class PluginCard(QFrame):
     # 点击信号
-    card_clicked = pyqtSignal(object)
+    card_clicked = Signal(object)
 
     def __init__(self, plugin):
         super().__init__()
