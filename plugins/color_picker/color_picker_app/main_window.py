@@ -1,12 +1,11 @@
-import time
-
 from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QFrame,
-                               QPushButton, QLabel, QSlider, QLineEdit, QColorDialog, QColormap)
-from PySide6.QtCore import Qt, Signal
+                               QPushButton, QLabel, QSlider, QLineEdit, QColorDialog,
+                               QApplication)
+from PySide6.QtCore import Qt, Signal, QTimer, QEventLoop
 from PySide6.QtGui import QColor
 from core.logger import get_logger
-from uitls import qt_hsl_to_common, common_hsl_to_qt
-from screen_color_picker import start_screen_color_pick
+from .utils import qt_hsl_to_common, common_hsl_to_qt
+from .screen_color_picker import start_screen_color_pick
 logger = get_logger(__name__)
 
 
@@ -23,6 +22,31 @@ class ColorPickerMainWindow(QMainWindow):
         self.color_label_border_style = "border: 2px solid black;"
         self.updating = False
         self.setup_ui()
+
+        self.show()
+        # self.raise_()  # 置顶
+        # self.activateWindow()  # 激活窗口
+
+        self.minimize_main_window()
+
+    def minimize_main_window(self):
+        """将主 Ttbox 窗口最小化"""
+        for w in QApplication.topLevelWidgets():
+            if isinstance(w, QMainWindow) and w.windowTitle() == "Ttbox":
+                w.showMinimized()
+                break
+
+    def restore_main_window(self):
+        """恢复主 Ttbox 窗口"""
+        for w in QApplication.topLevelWidgets():
+            if isinstance(w, QMainWindow) and w.windowTitle() == "Ttbox":
+                w.showNormal()
+                break
+
+    def closeEvent(self, event):
+        """关闭时恢复主窗口"""
+        self.restore_main_window()
+        super().closeEvent(event)
 
     def setup_ui(self):
         central = QWidget()
@@ -378,8 +402,10 @@ class ColorPickerMainWindow(QMainWindow):
         layout = QVBoxLayout(widget)
 
         get_color_button = QPushButton("取色")
+        get_color_button.setFixedHeight(50)
         get_color_button.clicked.connect(self.get_color)
         reset_button = QPushButton("重置")
+        reset_button.setFixedHeight(50)
         reset_button.clicked.connect(self.reset_color)
         layout.addWidget(get_color_button)
         layout.addWidget(reset_button)
@@ -392,9 +418,16 @@ class ColorPickerMainWindow(QMainWindow):
     def get_color(self):
 
         self.hide()
+        # 等待窗口完全隐藏后再截图（避免残留影子）
+        delay_loop = QEventLoop()
+        QTimer.singleShot(200, delay_loop.quit)
+        delay_loop.exec()
+
         try:
             # 拾取颜色
             color = start_screen_color_pick()
+
+            logger.debug(f"get_color 收到: isValid={color.isValid() if color else 'None'}, value={color.name() if color and color.isValid() else 'N/A'}")
 
             if color.isValid():  # 用户点击了OK
                 self._current_color = color
@@ -410,12 +443,3 @@ class ColorPickerMainWindow(QMainWindow):
             self.raise_()
             self.activateWindow()
 
-
-import sys
-from PySide6.QtWidgets import QApplication
-
-app = QApplication(sys.argv)
-w = ColorPickerMainWindow()
-w.show()
-
-sys.exit(app.exec())
