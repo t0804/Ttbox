@@ -40,6 +40,18 @@ class BasePlugin(ABC, metaclass=PluginMeta):
         pass
 
     def create_window(self):
-        """创建窗口"""
+        """创建插件窗口
+
+        注意：必须将窗口对象绑定到 self 上（如 self._window = XxxWindow()），
+        否则局部变量会在函数返回后被 Python GC 回收，导致窗口闪退。
+
+        正确写法：
+            self._window = MyWindow()
+            self._window.show()
+
+        错误写法：
+            MyWindow().show()              # 无引用 → 窗口闪退
+            w = MyWindow(); w.show()       # 局部变量 → 函数结束即回收
+        """
         logger.debug(f'插件无窗口')
         pass

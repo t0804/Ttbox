@@ -21,5 +21,5 @@ class TestPlugin(BasePlugin):
         print('创建一个新窗口')
         self.window = Main_window()
         self.window.show()
-        return self.window
+
 
