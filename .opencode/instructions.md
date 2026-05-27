@@ -1,4 +1,4 @@
-# Ttbox 项目知识（会话存档 2026-05-20）
+# Ttbox 项目知识（会话存档 2026-05-25）
 
 ## 项目概述
 基于 PySide6 的插件化桌面工具箱（Python），Windows 平台。
@@ -19,7 +19,7 @@ core/                # 核心框架
 ├── logger.py        # 日志系统
 └── style.qss        # Qt 样式表
 plugins/             # 插件（动态加载）
-├── calculator/      # 计算器（UI 未实现）
+├── calculator/      # 计算器（UI 骨架）
 ├── color_picker/    # 颜色拾取器 ✅ 已完成
 │   ├── index.py                 # 插件入口
 │   ├── color_picker_app/
@@ -28,6 +28,11 @@ plugins/             # 插件（动态加载）
 │   │   ├── screen_color_picker.py # QEventLoop 封装
 │   │   └── utils.py             # HSL 转换工具
 │   └── pyt_base_plugin.json
+├── timestamp_converter/ # 时间戳转换（开发中）
+│   ├── __init__.py              # 插件注册
+│   ├── index.py                 # 插件入口
+│   ├── main_window.py           # 主窗口：Live/Manual 状态机 + 双定时器
+│   └── timestamp_converter.svg  # 图标
 └── test_plugin/     # 测试插件
 ```
 
@@ -75,14 +80,46 @@ plugins/             # 插件（动态加载）
 - 选色后焦点没有自动离开：`picker_window.close()` 同时调用，`closeEvent` 退出 QEventLoop
 - PickerWindow 置灰无焦点：`setAttribute(Qt.WA_ShowWithoutActivating)` 已移除（需要焦点）
 
+## 时间戳转换插件 — 实现要点
+
+### 架构
+```
+Live/Manual 状态机 + 双定时器
+├── timer_1s (1000ms): 更新 self._now_time → refresh_display()
+├── timer_1ms (1ms): 仅更新毫秒戳（time.time() * 1000）
+└── tick 性能优化: 秒数没变时不刷其余字段（strftime/setText 开销约 8µs/次）
+```
+
+### LIVE/MANUAL 模式
+- **LIVE**: 定时器正常工作，显示当前时间
+- **MANUAL**: 用户编辑输入框时（FocusIn）暂停定时器
+- 使用 `eventFilter` 监听 FocusIn，不用子类或 lambda 替换
+- 还原按钮恢复 LIVE 模式
+
+### 双向输入同步
+- Unix 时间戳 ↔ ISO 格式互转，共用 `self._now_time` 作为真相源
+- `editingFinished` 信号（Enter/失焦）触发验证
+- 输入非法 → 红框提示，不切换模式
+
+### 时区处理
+- **不要存字符串**，存 tzinfo 对象（`self._current_timezone`）
+- Windows `astimezone().tzinfo` 返回的是对象，转 str 会得到"中国标准时间"（ZoneInfo 不认识）
+- 下拉框用 `["Local(当前时区)"] + UTC_OFFSET_LIST`
+- Local → `datetime.now().astimezone()`，其他 → `ZoneInfo(iana_name)` 或 `datetime.timezone(timedelta)`
+
+### NTP 校准（开发中）
+- HTTP API（`timeapi.org`），可配置服务器列表 + 超时
+- 底部状态栏设计：QFrame 默认 hidden，校准时 show → N 秒后 auto hide
+
 ## 其他关键知识点
 - `QTimer.singleShot(0, fn)` 延迟到下一事件循环迭代，非立即执行
 - QEventLoop + 嵌套事件循环是 Qt 标准模态阻塞模式
 - `setWindowFlags()` after `show()` on Windows → HWND 重建，可能丢失 WS_CLOSEBOX
-- 插件插件入口：`index.py` 中 `create_window()` 返回 QWidget 实例
+- 插件入口 `create_window()` 中必须用 `self.xxx = XxxWindow()` 持有窗口引用，否则 Python GC 回收导致窗口闪退（详细说明见 `core/plugin.py` 中 `create_window` 的 docstring）
 
 ## 已知遗留问题
 - calculator 插件 UI 骨架已创建但未实现
+- timestamp_converter NTP 校准 + 底部状态栏未完成
 
 ## 常用命令
 ```powershell
