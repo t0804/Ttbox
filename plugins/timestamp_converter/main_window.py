@@ -6,9 +6,9 @@ from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout,
                                QApplication, QComboBox, QFrame)
 from PySide6.QtCore import Qt, QTimer, QEvent
 import requests
+from .logic import offset_to_utc_str, utc_str_to_timezone, WEEKDAYS
 
 
-WEEKDAYS = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
 UTC_OFFSET_LIST = [
     "UTC-12:00", "UTC-11:00", "UTC-10:00", "UTC-09:30", "UTC-09:00",
     "UTC-08:00", "UTC-07:00", "UTC-06:00", "UTC-05:00", "UTC-04:00",
@@ -242,46 +242,10 @@ class TimestampConverterMainWindow(QMainWindow):
         else:
             # 根据索引获取时区偏移，生成时区对象
             offset_str = UTC_OFFSET_LIST[index - 1]
-            current_timezone = self.utc_str_to_timezone(offset_str)
+            current_timezone = utc_str_to_timezone(offset_str)
             self._now_time = datetime.datetime.now().astimezone(current_timezone)
             self._current_timezone = self._now_time.tzinfo
             self.refresh_display()
-
-    def offset_to_utc_str(self, offset) -> str:
-        """
-        将 timedelta 类型的时区偏移 转为 UTC±HH:MM 格式字符串
-        """
-        total_seconds = offset.total_seconds()
-        hours = int(total_seconds // 3600)
-        minutes = int(abs(total_seconds) % 3600 // 60)
-        if hours > 0:
-            sign = "+"
-        elif hours < 0:
-            sign = "-"
-            hours = abs(hours)
-        else:
-            sign = "±"
-        return f"UTC{sign}{hours:02d}:{minutes:02d}"
-
-    def utc_str_to_timezone(self, utc_str):
-        """
-        将 UTC 偏移字符串 转为 Python timezone 对象
-        支持：UTC-12:00, UTC-03:30, UTC+09:00, UTC±00:00 等格式
-        """
-        # 清理字符串，只保留符号、小时、分钟
-        s = utc_str.replace("UTC", "").replace("±", "+")
-        if s.startswith("-"):
-            sign = -1
-        else:
-            sign = 1
-        s = s[1:]
-        # 拆分小时、分钟
-        hh, mm = s.split(":")
-        hours = int(hh)
-        minutes = int(mm)
-        # 计算偏移
-        delta = datetime.timedelta(hours=sign * hours, minutes=sign * minutes)
-        return datetime.timezone(delta)
 
     def ntp_calibration(self):
         # 校准时间

@@ -1,24 +1,213 @@
-/* 主窗口背景 */
+/* ========== 主窗口 ========== */
 QMainWindow {
-    background: #f0f2f5;
+    background: #F9FAFB;
 }
 
-/* 功能按钮 */
+/* ========== 侧边导航 ========== */
+#nav_frame {
+    background: #FFFFFF;
+    border-right: 1px solid #E5E7EB;
+}
+
+#nav_btn {
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 14px;
+    color: #374151;
+    margin: 2px 8px;
+}
+
+#nav_btn:hover {
+    background: #F3F4F6;
+}
+
+#nav_btn[active="true"] {
+    background: #EFF6FF;
+    color: #2563EB;
+    font-weight: bold;
+}
+
+/* ========== 顶部标题栏 ========== */
+#title_bar {
+    background: transparent;
+}
+
+#title_label {
+    font-size: 20px;
+    font-weight: 600;
+    color: #111827;
+}
+
+/* ========== 搜索框 ========== */
+#search_box {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 14px;
+    color: #374151;
+    min-width: 220px;
+}
+
+#search_box:focus {
+    border-color: #3B82F6;
+    outline: none;
+}
+
+#search_box::placeholder {
+    color: #9CA3AF;
+}
+
+/* ========== 插件卡片 ========== */
+#plugin_card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 14px;
+}
+
+#plugin_card:hover {
+    border-color: #BFDBFE;
+    background: #F8FAFC;
+}
+
+/* ========== 翻页按钮 ========== */
+#page_btn {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    padding: 6px 16px;
+    font-size: 13px;
+    color: #374151;
+}
+
+#page_btn:hover {
+    background: #F3F4F6;
+    border-color: #D1D5DB;
+}
+
+#page_btn:disabled {
+    color: #D1D5DB;
+    border-color: #F3F4F6;
+}
+
+#page_label {
+    font-size: 13px;
+    color: #6B7280;
+    padding: 0 12px;
+}
+
+/* ========== 状态栏 ========== */
+QStatusBar {
+    background: #FFFFFF;
+    border-top: 1px solid #E5E7EB;
+    color: #6B7280;
+    font-size: 12px;
+}
+
+/* ========== 菜单栏 ========== */
+QMenuBar {
+    background: #FFFFFF;
+    border-bottom: 1px solid #E5E7EB;
+    color: #374151;
+    font-size: 13px;
+}
+
+QMenuBar::item:selected {
+    background: #F3F4F6;
+    border-radius: 4px;
+}
+
+QMenu {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 4px;
+}
+
+QMenu::item {
+    padding: 6px 24px;
+    border-radius: 4px;
+}
+
+QMenu::item:selected {
+    background: #EFF6FF;
+    color: #2563EB;
+}
+
+/* ========== 通用按钮 ========== */
 QPushButton {
-    background: #ffffff;
-    border: 1px solid #dddfe2;
-    border-radius: 5px;
-    margin: 5px;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: #374151;
 }
 
 QPushButton:hover {
-    background: #e9ebee;
+    background: #F3F4F6;
+    border-color: #D1D5DB;
 }
 
-/* 计算器显示屏 */
-QLineEdit {
-    font-size: 24px;
-    padding: 10px;
-    border: 2px solid #dddfe2;
-    border-radius: 5px;
+QPushButton:pressed {
+    background: #E5E7EB;
+}
+
+/* ========== 输入框 ========== */
+QLineEdit, QPlainTextEdit {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 14px;
+    color: #374151;
+}
+
+QLineEdit:focus, QPlainTextEdit:focus {
+    border-color: #3B82F6;
+}
+
+/* ========== 滚动条 ========== */
+QScrollBar:vertical {
+    background: transparent;
+    width: 8px;
+    margin: 0;
+}
+
+QScrollBar::handle:vertical {
+    background: #D1D5DB;
+    border-radius: 4px;
+    min-height: 30px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #9CA3AF;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0;
+}
+
+QScrollBar:horizontal {
+    background: transparent;
+    height: 8px;
+    margin: 0;
+}
+
+QScrollBar::handle:horizontal {
+    background: #D1D5DB;
+    border-radius: 4px;
+    min-width: 30px;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background: #9CA3AF;
+}
+
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0;
 }

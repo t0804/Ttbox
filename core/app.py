@@ -1,23 +1,22 @@
 import sys
+from pathlib import Path
 
 from PySide6.QtWidgets import QApplication
 from core.main_window_ui import MainWindowUI
-# from main_window_logic import MainWindowLogic
+from core.config import BASE_DIR
 from core import logger
+
 logger = logger.get_logger(__name__)
+
 
 def run():
     logger.debug('run app')
     app = QApplication(sys.argv)
 
+    qss_path = BASE_DIR / "core" / "style.qss"
+    if qss_path.exists():
+        app.setStyleSheet(qss_path.read_text(encoding="utf-8"))
 
-    # # 加载样式
-    # with open("./style.qss", "r", encoding='utf8') as f:
-    #     app.setStyleSheet(f.read())
-
-    # 初始化UI和逻辑
     ui = MainWindowUI()
-    # logic = MainWindowLogic(ui)  # 将UI实例注入逻辑层
-
     ui.show()
     sys.exit(app.exec())

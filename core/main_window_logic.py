@@ -13,10 +13,10 @@ class MainWindowLogic:
     """处理主窗口的业务逻辑，与UI解耦"""
 
     def __init__(self):
-        # self.ui = ui
         self.plugins = []
+        self._filtered = []
         self.load_plugins()
-        # self.load_test_plugins()
+        self._filtered = self.plugins[:]
 
     def load_test_plugins(self):
         """测试插件，实际上应该是动态加载所有插件"""
@@ -54,33 +54,37 @@ class MainWindowLogic:
             except ImportError as e:
                 logger.error(f'导入模块 {module_name} 失败: {e}')
 
-    def get_page_card(self, page_num=1):
+    def get_page_card(self, page_num=1, plugins=None):
         """
         根据传入的页数返回当页的所有卡片对象, 将所有插件9个分为1组，第一页就是第一组，返回包含行列信息的列表,3x3
         :param page_num: int
+        :param plugins: 可选，指定插件列表（用于搜索过滤）
         :return: list[[card_obj,0,0],[card_obj,0,1]]
         """
         if page_num < 1:
             raise ValueError("页码必须大于等于1")
-
-        # 每页9个插件 (3x3网格)
+        src = plugins if plugins is not None else self._filtered
         per_page = 9
         start_idx = (page_num - 1) * per_page
         end_idx = start_idx + per_page
-        # print(start_idx, end_idx)
-        page_plugins = self.plugins[start_idx:end_idx]
+        page_plugins = src[start_idx:end_idx]
 
-        # 生成带网格位置信息的卡片列表
         cards_with_pos = []
         for idx, plugin in enumerate(page_plugins):
-            row = idx // 3  # 行索引 (0-2)
-            col = idx % 3  # 列索引 (0-2)
-
-            # 创建卡片对象
+            row = idx // 3
+            col = idx % 3
             card = PluginCard(plugin)
             cards_with_pos.append((card, row, col))
-        # print(cards_with_pos)
         return cards_with_pos
+
+    def search(self, query):
+        """按名称过滤插件，返回过滤后的列表"""
+        q = query.strip().lower()
+        if not q:
+            self._filtered = self.plugins[:]
+        else:
+            self._filtered = [p for p in self.plugins if q in p.name.lower()]
+        return self._filtered
 
     def open_plugin_window(self, plugin):
         """创建插件窗口"""
